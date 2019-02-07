@@ -20,7 +20,7 @@ for a note about Go cross-compiling support.
 
 The jx's binary eCLI is  built on your machine in your GO Path. 
 
-On macOS, Go can be installed with [Homebrew][]:
+On macOS, Go can be installebuild integrationd with [Homebrew][]:
 
 ```shell
 
