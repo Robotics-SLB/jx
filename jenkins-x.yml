@@ -21,30 +21,30 @@ pipelineConfig:
               - name: GIT_COMMITTER_NAME
                 value: jenkins-x-bot
             steps:
-            - name: build-binary
-              image: docker.io/golang:1.11.5
-              command:
-                - make
-                - linux
-              workingDir: "/workspace/source"
-              env:
-                - name: GOPATH
-                  value: /workspace/go
-                - name: GOPROXY
-                  value: http://athens-proxy.jx.cd.jenkins-x.io
-              resources:
-                limits:
-                  cpu: 4
-                  memory: 6144Mi
-                requests:
-                  cpu: 3
-                  memory: 3072Mi
-            - name: validate-binary
-              image: docker.io/golang:1.11.5
-              command:
-                - ./build/linux/jx
-                - --help
-              workingDir: "/workspace/source"
-              env:
-                - name: GOPATH
-                  value: /workspace/go
+              - name: build-binary
+                image: docker.io/golang:1.11.5
+                # command:
+                #   - "make"
+                #   - linux
+                workingDir: "/workspace/source"
+                env:
+                  - name: GOPATH
+                    value: /workspace/go
+                  - name: GOPROXY
+                    value: http://athens-proxy.jx.cd.jenkins-x.io
+                resources:
+                  limits:
+                    cpu: 4
+                    memory: 6144Mi
+                  requests:
+                    cpu: 3
+                    memory: 3072Mi
+            # - name: validate-binary
+            #   image: docker.io/golang:1.11.5
+            #   command:
+            #     - "./build/linux/jx"
+            #     - --help
+            #   workingDir: "/workspace/source"
+            #   env:
+            #     - name: GOPATH
+            #       value: /workspace/go
