@@ -4,6 +4,7 @@ chat:
   developerChannel: '#jenkins-x-dev'
   userChannel: '#jenkins-x-user'
 pipelineConfig:
+  buildPack: none
   pipelines:
     pullrequest:
       pipeline:
