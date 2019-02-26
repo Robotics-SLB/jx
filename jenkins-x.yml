@@ -5,7 +5,7 @@ chat:
   userChannel: '#jenkins-x-user'
 pipelineConfig:
   pipelines:
-    release:
+    pullrequest:
       pipeline:
         agent:
           image: rawlingsj/executor:dev31
