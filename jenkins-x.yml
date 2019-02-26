@@ -7,6 +7,8 @@ pipelineConfig:
   pipelines:
     release:
       pipeline:
+        agent:
+          image: rawlingsj/executor:dev31
         stages:
           - name: ci
             environment:
@@ -36,12 +38,11 @@ pipelineConfig:
                   requests:
                     cpu: 3
                     memory: 3072Mi
-            # - name: validate-binary
-            #   image: docker.io/golang:1.11.5
-            #   command:
-            #     - "./build/linux/jx"
-            #     - --help
-            #   workingDir: "/workspace/source"
-            #   env:
-            #     - name: GOPATH
-            #       value: /workspace/go
+              - name: validate-binary
+                image: docker.io/golang:1.11.5
+                command: "./build/linux/jx"
+                args: ['--help']
+                workingDir: "/workspace/source"
+                env:
+                  - name: GOPATH
+                    value: /workspace/go
