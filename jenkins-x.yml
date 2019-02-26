@@ -3,8 +3,8 @@ chat:
   url: http://kubernetes.slack.com/
   developerChannel: '#jenkins-x-dev'
   userChannel: '#jenkins-x-user'
+buildPack: none
 pipelineConfig:
-  buildPack: none
   pipelines:
     pullrequest:
       pipeline:
