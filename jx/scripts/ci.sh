@@ -5,9 +5,7 @@ echo "verifying Pull Request"
 
 export ORG="jenkinsxio"
 export APP_NAME="jx"
-export PREVIEW_VERSION="0.0.0-SNAPSHOT-${BRANCH_NAME}-${BUILD_ID}"
 export TEAM="$(echo ${BRANCH_NAME}-$BUILD_ID  | tr '[:upper:]' '[:lower:]')"
-export PREVIEW_IMAGE_TAG="SNAPSHOT-JX-$BRANCH_NAME-$BUILD_ID"
 
 export GHE_CREDS_PSW="$(jx step credential -s jx-pipeline-git-github-ghe)"
 export JENKINS_CREDS_PSW="$(jx step credential -s  test-jenkins-user)"
@@ -30,7 +28,7 @@ git config --global --add user.email jenkins-x@googlegroups.com
 gcloud auth activate-service-account --key-file $GKE_SA
 gcloud container clusters get-credentials anthorse --zone europe-west1-b --project jenkinsx-dev
 
-sed s/\$VERSION/${PREVIEW_IMAGE_TAG}/g myvalues.yaml.template > myvalues.yaml
+sed s/\$VERSION/${VERSION}/g myvalues.yaml.template > myvalues.yaml
 
 echo the myvalues.yaml file is:
 cat myvalues.yaml
