@@ -6,7 +6,7 @@ chat:
 buildPack: none
 pipelineConfig:
   pipelines:
-    pullrequest:
+    pullRequest:
       pipeline:
         agent:
           image: rawlingsj/executor:dev31
