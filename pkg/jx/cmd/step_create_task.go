@@ -361,6 +361,8 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 	}
 
 	tr := &syntax.TektonResources{}
+	tr.Tasks = o.getDefaultTasks()
+
 	pipelineResourceName := tekton.PipelineResourceName(o.GitInfo, o.Branch, o.Context)
 
 	err = o.setBuildValues()
@@ -1497,6 +1499,30 @@ func (o *StepCreateTaskOptions) getDockerRegistry() string {
 		dockerRegistry = o.dockerRegistry()
 	}
 	return dockerRegistry
+}
+
+// todo JR lets remove this when we switch tekton to using git merge type pipelineresources
+func (o *StepCreateTaskOptions) getDefaultTasks() []*pipelineapi.Task {
+
+	gitMergeStep := []corev1.Container{
+		{
+			Name:    "git-merge",
+			Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
+			Command: []string{"jx"},
+			Args:    []string{"step", "git", "merge"},
+		},
+	}
+
+	return []*pipelineapi.Task{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "foo",
+			},
+			Spec: pipelineapi.TaskSpec{
+				Steps: gitMergeStep,
+			},
+		},
+	}
 }
 
 // ObjectReferences creates a list of object references created
