@@ -1515,9 +1515,9 @@ func (o *StepCreateTaskOptions) getDefaultTasks() []*pipelineapi.Task {
 
 	return []*pipelineapi.Task{
 		{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "foo",
-			},
+			//ObjectMeta: metav1.ObjectMeta{
+			//	Name: "foo",
+			//},
 			Spec: pipelineapi.TaskSpec{
 				Steps: gitMergeStep,
 			},
