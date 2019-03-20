@@ -28,6 +28,15 @@ type ParsedPipeline struct {
 	Post        []Post      `json:"post,omitempty"`
 }
 
+// TektonResources
+type TektonResources struct {
+	Tasks     []*tektonv1alpha1.Task
+	Pipeline  *tektonv1alpha1.Pipeline
+	Structure *v1.PipelineStructure
+	Run       *tektonv1alpha1.PipelineRun
+	Resources []*tektonv1alpha1.PipelineResource
+}
+
 // Agent defines where the pipeline, stage, or step should run.
 type Agent struct {
 	// One of label or image is required.
@@ -927,15 +936,15 @@ func generateSteps(step Step, inheritedAgent string, env []corev1.EnvVar, podTem
 }
 
 // GenerateCRDs translates the Pipeline structure into the corresponding Pipeline and Task CRDs
-func (j *ParsedPipeline) GenerateCRDs(pipelineIdentifier string, buildIdentifier string, namespace string, podTemplates map[string]*corev1.Pod, taskParams []tektonv1alpha1.TaskParam) (*tektonv1alpha1.Pipeline, []*tektonv1alpha1.Task, *v1.PipelineStructure, error) {
+func (j *ParsedPipeline) GenerateCRDs(pipelineIdentifier string, buildIdentifier string, namespace string, podTemplates map[string]*corev1.Pod, taskParams []tektonv1alpha1.TaskParam, tr *TektonResources) error {
 	if len(j.Post) != 0 {
-		return nil, nil, nil, errors.New("Post at top level not yet supported")
+		return errors.New("Post at top level not yet supported")
 	}
 
 	if !equality.Semantic.DeepEqual(j.Options, RootOptions{}) {
 		o := j.Options
 		if o.Retry != 0 {
-			return nil, nil, nil, errors.New("Retry at top level not yet supported")
+			return errors.New("Retry at top level not yet supported")
 		}
 	}
 
@@ -968,18 +977,16 @@ func (j *ParsedPipeline) GenerateCRDs(pipelineIdentifier string, buildIdentifier
 
 	var previousStage *transformedStage
 
-	var tasks []*tektonv1alpha1.Task
-
 	baseEnv := j.toStepEnvVars()
 
 	for _, s := range j.Stages {
 		wsPath := ""
-		if len(tasks) == 0 {
+		if len(tr.Tasks) == 0 {
 			wsPath = "workspace"
 		}
 		stage, err := stageToTask(s, pipelineIdentifier, buildIdentifier, namespace, wsPath, baseEnv, j.Agent, "default", 0, nil, previousStage, podTemplates)
 		if err != nil {
-			return nil, nil, nil, err
+			return err
 		}
 		previousStage = stage
 
@@ -990,12 +997,12 @@ func (j *ParsedPipeline) GenerateCRDs(pipelineIdentifier string, buildIdentifier
 			}
 		}
 
-		tasks = append(tasks, linearTasks...)
+		tr.Tasks = append(tr.Tasks, linearTasks...)
 		p.Spec.Tasks = append(p.Spec.Tasks, createPipelineTasks(stage, pipelineIdentifier)...)
 		structure.Stages = append(structure.Stages, stage.getAllAsPipelineStructureStages()...)
 	}
 
-	return p, tasks, structure, nil
+	return nil
 }
 
 func createPipelineTasks(stage *transformedStage, pipelineIdentifier string) []tektonv1alpha1.PipelineTask {
