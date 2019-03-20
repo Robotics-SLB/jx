@@ -744,6 +744,7 @@ func stageToTask(s Stage, pipelineIdentifier string, buildIdentifier string, nam
 
 	stepCounter := 0
 
+	defaultTaskSpec := getDefaultTaskSpec()
 	if len(s.Steps) > 0 {
 		t := &tektonv1alpha1.Task{
 			TypeMeta: metav1.TypeMeta{
@@ -755,6 +756,7 @@ func stageToTask(s Stage, pipelineIdentifier string, buildIdentifier string, nam
 				Name:      MangleToRfc1035Label(fmt.Sprintf("%s-%s", pipelineIdentifier, s.Name), ""),
 				Labels:    util.MergeMaps(map[string]string{LabelStageName: s.stageLabelName()}),
 			},
+			Spec: defaultTaskSpec,
 		}
 		t.SetDefaults()
 
@@ -1194,4 +1196,21 @@ func validateStageNames(j *ParsedPipeline) (err *apis.FieldError) {
 	err = findDuplicates(names)
 
 	return
+}
+
+// todo JR lets remove this when we switch tekton to using git merge type pipelineresources
+func getDefaultTaskSpec() tektonv1alpha1.TaskSpec {
+
+	gitMergeStep := []corev1.Container{
+		{
+			Name:    "git-merge",
+			Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
+			Command: []string{"jx"},
+			Args:    []string{"step", "git", "merge"},
+		},
+	}
+
+	return tektonv1alpha1.TaskSpec{
+		Steps: gitMergeStep,
+	}
 }
