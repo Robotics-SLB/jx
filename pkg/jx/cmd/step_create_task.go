@@ -361,6 +361,7 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 	}
 
 	tr := &syntax.TektonResources{}
+	//tr.Tasks = o.getDefaultTasks()
 
 	pipelineResourceName := tekton.PipelineResourceName(o.GitInfo, o.Branch, o.Context)
 
@@ -468,7 +469,7 @@ func (o *StepCreateTaskOptions) CreateTaskForBuildPack(languageName string, pipe
 	}
 	dir := o.getWorkspaceDir()
 
-	steps := o.getDefaultSteps()
+	steps := []corev1.Container{}
 	volumes := []corev1.Volume{}
 	for _, n := range lifecycles.All() {
 		l := n.Lifecycle
@@ -964,7 +965,7 @@ func (o *StepCreateTaskOptions) applyPipeline(pipeline *pipelineapi.Pipeline, ta
 
 func (o *StepCreateTaskOptions) createSteps(languageName string, pipelineConfig *jenkinsfile.PipelineConfig, templateKind string, step *jenkinsfile.PipelineStep, containerName string, dir string, prefixPath string) ([]corev1.Container, []corev1.Volume, error) {
 	volumes := []corev1.Volume{}
-	steps := o.getDefaultSteps()
+	steps := []corev1.Container{}
 
 	if step.Container != "" {
 		containerName = step.Container
@@ -1500,18 +1501,30 @@ func (o *StepCreateTaskOptions) getDockerRegistry() string {
 	return dockerRegistry
 }
 
-// todo JR lets remove this when we switch tekton to using git merge type pipelineresources
-func (o *StepCreateTaskOptions) getDefaultSteps() []corev1.Container {
-
-	return []corev1.Container{
-		{
-			Name:    "git-merge",
-			Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
-			Command: []string{"jx"},
-			Args:    []string{"step", "git", "merge"},
-		},
-	}
-}
+//
+//// todo JR lets remove this when we switch tekton to using git merge type pipelineresources
+//func (o *StepCreateTaskOptions) getDefaultSteps() []*pipelineapi.Task {
+//
+//	gitMergeStep := []corev1.Container{
+//		{
+//			Name:    "git-merge",
+//			Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
+//			Command: []string{"jx"},
+//			Args:    []string{"step", "git", "merge"},
+//		},
+//	}
+//
+//	return []*pipelineapi.Task{
+//		{
+//			ObjectMeta: metav1.ObjectMeta{
+//				Name: "foo",
+//			},
+//			Spec: pipelineapi.TaskSpec{
+//				Steps: gitMergeStep,
+//			},
+//		},
+//	}
+//}
 
 // ObjectReferences creates a list of object references created
 func (r *StepCreateTaskResults) ObjectReferences() []kube.ObjectReference {
