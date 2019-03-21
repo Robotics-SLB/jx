@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/ghodss/yaml"
 	"github.com/jenkins-x/jx/pkg/apis/jenkins.io/v1"
 	"github.com/jenkins-x/jx/pkg/config"
@@ -361,14 +363,15 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 	}
 
 	tr := &syntax.TektonResources{}
-	pipelineResourceName := tekton.PipelineResourceName(o.GitInfo, o.Branch, o.Context)
 
+	pipelineResourceName := tekton.PipelineResourceName(o.GitInfo, o.Branch, o.Context)
 	err = o.setBuildValues()
 	if err != nil {
 		return nil, err
 	}
-
+	logrus.Info("C 1")
 	if lifecycles != nil && lifecycles.Pipeline != nil {
+		logrus.Info("C 2")
 		// TODO: Seeing weird behavior seemingly related to https://golang.org/doc/faq#nil_error
 		// if err is reused, maybe we need to switch return types (perhaps upstream in build-pipeline)?
 		if validateErr := lifecycles.Pipeline.Validate(); validateErr != nil {
@@ -386,7 +389,9 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 
 		tr.Resources = append(tr.Resources, o.generateSourceRepoResource(pipelineResourceName))
 	} else {
+		logrus.Info("C 3")
 		t, err := o.CreateTaskForBuildPack(name, pipelineConfig, lifecycles, kind, ns)
+
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed to generate Task from build pack")
 		}
@@ -466,8 +471,7 @@ func (o *StepCreateTaskOptions) CreateTaskForBuildPack(languageName string, pipe
 		container = o.CustomImage
 	}
 	dir := o.getWorkspaceDir()
-
-	steps := []corev1.Container{}
+	steps := syntax.GetDefaultSteps()
 	volumes := []corev1.Volume{}
 	for _, n := range lifecycles.All() {
 		l := n.Lifecycle
@@ -618,7 +622,6 @@ func (o *StepCreateTaskOptions) EnhanceTasksAndPipeline(tasks []*pipelineapi.Tas
 	}
 
 	taskParams := o.createPipelineTaskParams()
-
 	for i, pt := range pipeline.Spec.Tasks {
 		for _, tp := range taskParams {
 			if !hasPipelineParam(pt.Params, tp.Name) {
@@ -774,7 +777,6 @@ func (o *StepCreateTaskOptions) combineLabels(labels map[string]string) error {
 		if len(parts) != 2 {
 			return errors.Errorf("expected 2 parts to label but got %v", len(parts))
 		}
-		log.Infof("a %s : %s \n", parts[0], parts[1])
 		labels[parts[0]] = parts[1]
 	}
 	o.labels = labels
@@ -1174,7 +1176,6 @@ func (o *StepCreateTaskOptions) modifyEnvVars(container *corev1.Container, globa
 			Value: "true",
 		})
 	}
-
 	for _, param := range o.Results.PipelineParams {
 		name := strings.ToUpper(param.Name)
 		if kube.GetSliceEnvVar(envVars, name) == nil {
