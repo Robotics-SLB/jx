@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -361,14 +362,15 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 	}
 
 	tr := &syntax.TektonResources{}
-	pipelineResourceName := tekton.PipelineResourceName(o.GitInfo, o.Branch, o.Context)
 
+	pipelineResourceName := tekton.PipelineResourceName(o.GitInfo, o.Branch, o.Context)
 	err = o.setBuildValues()
 	if err != nil {
 		return nil, err
 	}
-
+	logrus.Info("C 1")
 	if lifecycles != nil && lifecycles.Pipeline != nil {
+		logrus.Info("C 2")
 		// TODO: Seeing weird behavior seemingly related to https://golang.org/doc/faq#nil_error
 		// if err is reused, maybe we need to switch return types (perhaps upstream in build-pipeline)?
 		if validateErr := lifecycles.Pipeline.Validate(); validateErr != nil {
@@ -386,7 +388,9 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 
 		tr.Resources = append(tr.Resources, o.generateSourceRepoResource(pipelineResourceName))
 	} else {
+		logrus.Info("C 3")
 		t, err := o.CreateTaskForBuildPack(name, pipelineConfig, lifecycles, kind, ns)
+
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed to generate Task from build pack")
 		}
@@ -397,7 +401,9 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 		tr.Tasks = append(tr.Tasks, t)
 		tr.Resources = append(tr.Resources, r)
 	}
-
+	logrus.Info("C 4")
+	logrus.Infof("xx1 %v", tr)
+	logrus.Infof("xx2 %v", len(tr.Tasks))
 	o.EnhanceTasksAndPipeline(tr.Tasks, tr.Pipeline, pipelineConfig)
 
 	tr.Run = o.CreatePipelineRun(tr.Pipeline, tr.Resources)
@@ -466,8 +472,9 @@ func (o *StepCreateTaskOptions) CreateTaskForBuildPack(languageName string, pipe
 		container = o.CustomImage
 	}
 	dir := o.getWorkspaceDir()
-
-	steps := []corev1.Container{}
+	logrus.Info("B 1")
+	steps := syntax.GetDefaultSteps()
+	logrus.Info("B 2")
 	volumes := []corev1.Volume{}
 	for _, n := range lifecycles.All() {
 		l := n.Lifecycle
@@ -618,9 +625,11 @@ func (o *StepCreateTaskOptions) EnhanceTasksAndPipeline(tasks []*pipelineapi.Tas
 	}
 
 	taskParams := o.createPipelineTaskParams()
-
+	logrus.Info("A 1")
 	for i, pt := range pipeline.Spec.Tasks {
+		logrus.Info("A 2")
 		for _, tp := range taskParams {
+			logrus.Info("A 3")
 			if !hasPipelineParam(pt.Params, tp.Name) {
 				pt.Params = append(pt.Params, tp)
 				pipeline.Spec.Tasks[i] = pt
@@ -774,7 +783,6 @@ func (o *StepCreateTaskOptions) combineLabels(labels map[string]string) error {
 		if len(parts) != 2 {
 			return errors.Errorf("expected 2 parts to label but got %v", len(parts))
 		}
-		log.Infof("a %s : %s \n", parts[0], parts[1])
 		labels[parts[0]] = parts[1]
 	}
 	o.labels = labels
