@@ -3,6 +3,8 @@ package syntax
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/jenkins-x/jx/pkg/log"
+	"github.com/sirupsen/logrus"
 	"regexp"
 	"sort"
 	"strconv"
@@ -743,8 +745,7 @@ func stageToTask(s Stage, pipelineIdentifier string, buildIdentifier string, nam
 	}
 
 	stepCounter := 0
-
-	defaultTaskSpec := getDefaultTaskSpec()
+	defaultTaskSpec := GetDefaultTaskSpec()
 	if len(s.Steps) > 0 {
 		t := &tektonv1alpha1.Task{
 			TypeMeta: metav1.TypeMeta{
@@ -813,7 +814,6 @@ func stageToTask(s Stage, pipelineIdentifier string, buildIdentifier string, nam
 		ts.computeWorkspace(parentWorkspace)
 		return &ts, nil
 	}
-
 	if len(s.Stages) > 0 {
 		var tasks []*transformedStage
 		ts := transformedStage{Stage: s, Depth: depth, EnclosingStage: enclosingStage, PreviousSiblingStage: previousSiblingStage}
@@ -859,7 +859,6 @@ func stageToTask(s Stage, pipelineIdentifier string, buildIdentifier string, nam
 
 		return &ts, nil
 	}
-
 	return nil, errors.New("no steps, sequential stages, or parallel stages")
 }
 
@@ -1199,8 +1198,7 @@ func validateStageNames(j *ParsedPipeline) (err *apis.FieldError) {
 }
 
 // todo JR lets remove this when we switch tekton to using git merge type pipelineresources
-func getDefaultTaskSpec() tektonv1alpha1.TaskSpec {
-
+func GetDefaultTaskSpec() tektonv1alpha1.TaskSpec {
 	gitMergeStep := []corev1.Container{
 		{
 			Name:    "git-merge",
@@ -1213,4 +1211,18 @@ func getDefaultTaskSpec() tektonv1alpha1.TaskSpec {
 	return tektonv1alpha1.TaskSpec{
 		Steps: gitMergeStep,
 	}
+}
+
+// todo JR lets remove this when we switch tekton to using git merge type pipelineresources
+func GetDefaultSteps() []corev1.Container {
+	return []corev1.Container{
+		{
+			Name: "git-merge",
+			//Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
+			Image:   "rawlingsj/builder-jx:wip11",
+			Command: []string{"jx"},
+			Args:    []string{"step", "git", "merge"},
+		},
+	}
+
 }

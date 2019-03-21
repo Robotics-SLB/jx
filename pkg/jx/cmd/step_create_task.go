@@ -364,12 +364,10 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 	//tr.Tasks = o.getDefaultTasks()
 
 	pipelineResourceName := tekton.PipelineResourceName(o.GitInfo, o.Branch, o.Context)
-
 	err = o.setBuildValues()
 	if err != nil {
 		return nil, err
 	}
-
 	if lifecycles != nil && lifecycles.Pipeline != nil {
 		// TODO: Seeing weird behavior seemingly related to https://golang.org/doc/faq#nil_error
 		// if err is reused, maybe we need to switch return types (perhaps upstream in build-pipeline)?
@@ -389,6 +387,7 @@ func (o *StepCreateTaskOptions) GenerateTektonCRDs(packsDir string, projectConfi
 		tr.Resources = append(tr.Resources, o.generateSourceRepoResource(pipelineResourceName))
 	} else {
 		t, err := o.CreateTaskForBuildPack(name, pipelineConfig, lifecycles, kind, ns)
+
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed to generate Task from build pack")
 		}
@@ -469,7 +468,7 @@ func (o *StepCreateTaskOptions) CreateTaskForBuildPack(languageName string, pipe
 	}
 	dir := o.getWorkspaceDir()
 
-	steps := []corev1.Container{}
+	steps := syntax.GetDefaultSteps()
 	volumes := []corev1.Volume{}
 	for _, n := range lifecycles.All() {
 		l := n.Lifecycle
@@ -776,7 +775,6 @@ func (o *StepCreateTaskOptions) combineLabels(labels map[string]string) error {
 		if len(parts) != 2 {
 			return errors.Errorf("expected 2 parts to label but got %v", len(parts))
 		}
-		log.Infof("a %s : %s \n", parts[0], parts[1])
 		labels[parts[0]] = parts[1]
 	}
 	o.labels = labels
