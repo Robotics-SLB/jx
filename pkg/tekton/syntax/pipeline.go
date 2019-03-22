@@ -3,6 +3,7 @@ package syntax
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
 	"regexp"
 	"sort"
@@ -1208,6 +1209,12 @@ func GetDefaultTaskSpec(parentEnv []corev1.EnvVar) tektonv1alpha1.TaskSpec {
 
 // todo JR lets remove this when we switch tekton to using git merge type pipelineresources
 func GetDefaultSteps(parentEnv []corev1.EnvVar) []corev1.Container {
+	logrus.Infof("ZZZZ1 %v", len(parentEnv))
+	for _, v := range parentEnv {
+		logrus.Infof("ZZZZ2 %s", v.Name)
+		logrus.Infof("ZZZZ3 %s", v.Value)
+	}
+
 	v := os.Getenv("BUILDER_JX_IMAGE")
 	if v == "" {
 		v = "rawlingsj/builder-jx:wip15"
