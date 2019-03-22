@@ -755,7 +755,7 @@ func stageToTask(s Stage, pipelineIdentifier string, buildIdentifier string, nam
 				Name:      MangleToRfc1035Label(fmt.Sprintf("%s-%s", pipelineIdentifier, s.Name), ""),
 				Labels:    util.MergeMaps(map[string]string{LabelStageName: s.stageLabelName()}),
 			},
-			Spec: GetDefaultTaskSpec(),
+			Spec: GetDefaultTaskSpec(parentEnv),
 		}
 		t.SetDefaults()
 
@@ -1200,44 +1200,37 @@ func validateStageNames(j *ParsedPipeline) (err *apis.FieldError) {
 }
 
 // todo JR lets remove this when we switch tekton to using git merge type pipelineresources
-func GetDefaultTasks() []tektonv1alpha1.Task {
-	return []tektonv1alpha1.Task{
-		{
-			Spec: GetDefaultTaskSpec(),
-		},
-	}
-}
-
-// todo JR lets remove this when we switch tekton to using git merge type pipelineresources
-func GetDefaultTaskSpec() tektonv1alpha1.TaskSpec {
+func GetDefaultTaskSpec(parentEnv []corev1.EnvVar) tektonv1alpha1.TaskSpec {
 	return tektonv1alpha1.TaskSpec{
-		Steps: GetDefaultSteps(),
+		Steps: GetDefaultSteps(parentEnv),
 	}
 }
 
 // todo JR lets remove this when we switch tekton to using git merge type pipelineresources
-func GetDefaultSteps() []corev1.Container {
+func GetDefaultSteps(parentEnv []corev1.EnvVar) []corev1.Container {
 	v := os.Getenv("BUILDER_JX_IMAGE")
 	if v == "" {
 		v = "rawlingsj/builder-jx:wip15"
 	}
-	//return []corev1.Container{
-	//	{
-	//		Name: "git-merge",
-	//		//Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
-	//		Image:   v,
-	//		Command: []string{"jx"},
-	//		Args:    []string{"step", "git", "merge"},
-	//	},
-	//}
 	return []corev1.Container{
 		{
 			Name: "git-merge",
 			//Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
 			Image:      v,
-			Command:    []string{"sleep"},
-			Args:       []string{"20000"},
-			WorkingDir: "workspace",
+			Command:    []string{"jx"},
+			Args:       []string{"step", "git", "merge"},
+			WorkingDir: "/workspace/workspace",
+			Env:        parentEnv,
 		},
 	}
+	//return []corev1.Container{
+	//	{
+	//		Name: "git-merge",
+	//		//Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
+	//		Image:      v,
+	//		Command:    []string{"sleep"},
+	//		Args:       []string{"20000"},
+	//		WorkingDir: "/workspace/workspace",
+	//	},
+	//}
 }

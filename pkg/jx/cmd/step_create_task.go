@@ -471,7 +471,7 @@ func (o *StepCreateTaskOptions) CreateTaskForBuildPack(languageName string, pipe
 		container = o.CustomImage
 	}
 	dir := o.getWorkspaceDir()
-	steps := syntax.GetDefaultSteps()
+	steps := syntax.GetDefaultSteps(pipelineConfig.Env)
 	volumes := []corev1.Volume{}
 	for _, n := range lifecycles.All() {
 		l := n.Lifecycle
