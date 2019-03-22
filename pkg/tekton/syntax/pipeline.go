@@ -1221,14 +1221,22 @@ func GetDefaultSteps() []corev1.Container {
 	if v == "" {
 		v = "rawlingsj/builder-jx:wip15"
 	}
+	//return []corev1.Container{
+	//	{
+	//		Name: "git-merge",
+	//		//Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
+	//		Image:   v,
+	//		Command: []string{"jx"},
+	//		Args:    []string{"step", "git", "merge"},
+	//	},
+	//}
 	return []corev1.Container{
 		{
 			Name: "git-merge",
 			//Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
 			Image:   v,
-			Command: []string{"jx"},
-			Args:    []string{"step", "git", "merge"},
+			Command: []string{"sleep"},
+			Args:    []string{"20000"},
 		},
 	}
-
 }
