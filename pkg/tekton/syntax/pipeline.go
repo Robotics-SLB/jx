@@ -1234,9 +1234,10 @@ func GetDefaultSteps() []corev1.Container {
 		{
 			Name: "git-merge",
 			//Image:   "gcr.io/jenkinsxio/builder-jx:0.1.297",
-			Image:   v,
-			Command: []string{"sleep"},
-			Args:    []string{"20000"},
+			Image:      v,
+			Command:    []string{"sleep"},
+			Args:       []string{"20000"},
+			WorkingDir: "workspace",
 		},
 	}
 }
