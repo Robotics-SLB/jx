@@ -1217,7 +1217,7 @@ func GetDefaultSteps(parentEnv []corev1.EnvVar) []corev1.Container {
 
 	v := os.Getenv("BUILDER_JX_IMAGE")
 	if v == "" {
-		v = "rawlingsj/builder-jx:wip15"
+		v = "rawlingsj/builder-jx:wip19"
 	}
 	return []corev1.Container{
 		{
