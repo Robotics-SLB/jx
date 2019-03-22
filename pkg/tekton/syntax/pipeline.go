@@ -756,7 +756,7 @@ func stageToTask(s Stage, pipelineIdentifier string, buildIdentifier string, nam
 				Name:      MangleToRfc1035Label(fmt.Sprintf("%s-%s", pipelineIdentifier, s.Name), ""),
 				Labels:    util.MergeMaps(map[string]string{LabelStageName: s.stageLabelName()}),
 			},
-			Spec: GetDefaultTaskSpec(parentEnv),
+			Spec: GetDefaultTaskSpec(env),
 		}
 		t.SetDefaults()
 
