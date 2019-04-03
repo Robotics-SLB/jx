@@ -1036,6 +1036,7 @@ func (o *StepCreateTaskOptions) createSteps(languageName string, pipelineConfig 
 		if len(commands) > 1 {
 			s.Arguments = append(s.Arguments, commands[1:]...)
 		}
+		s.Image = containerName
 		if o.CustomImage != "" {
 			s.Image = o.CustomImage
 		}
