@@ -3,15 +3,16 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/jenkins-x/jx/pkg/jx/cmd/helper"
 	"strings"
 	"time"
 
-	"github.com/Pallinder/go-randomdata"
+	randomdata "github.com/Pallinder/go-randomdata"
+	"github.com/jenkins-x/jx/pkg/jx/cmd/helper"
+	survey "gopkg.in/AlecAivazis/survey.v1"
+
 	"github.com/jenkins-x/jx/pkg/cloud"
 	"github.com/jenkins-x/jx/pkg/features"
 	"github.com/jenkins-x/jx/pkg/kube"
-	"gopkg.in/AlecAivazis/survey.v1"
 
 	osUser "os/user"
 
@@ -367,7 +368,7 @@ func (o *CreateClusterGKEOptions) createClusterGKE() error {
 		if o.Flags.EnhancedScopes && !o.InstallOptions.Flags.Kaniko {
 			prompt := &survey.Confirm{
 				Message: "Would you like to enable Kaniko for building container images",
-				Default: o.Flags.EnhancedScopes,
+				Default: true,
 				Help:    "Use Kaniko for docker images",
 			}
 			err = survey.AskOne(prompt, &o.InstallOptions.Flags.Kaniko, nil, surveyOpts)
@@ -377,12 +378,12 @@ func (o *CreateClusterGKEOptions) createClusterGKE() error {
 		}
 	}
 
-	if o.InstallOptions.Flags.NextGeneration || o.InstallOptions.Flags.Tekton || o.InstallOptions.Flags.Kaniko {
-		// lets default the docker registry to GCR
-		if o.InstallOptions.Flags.DockerRegistry == "" {
-			o.InstallOptions.Flags.DockerRegistry = "gcr.io"
-		}
+	// lets default the docker registry to GCR
+	if o.InstallOptions.Flags.DockerRegistry == "" {
+		o.InstallOptions.Flags.DockerRegistry = "gcr.io"
+	}
 
+	if o.InstallOptions.Flags.NextGeneration || o.InstallOptions.Flags.Tekton || o.InstallOptions.Flags.Kaniko {
 		// lets default the docker registry org to the project id
 		if o.InstallOptions.Flags.DockerRegistryOrg == "" {
 			o.InstallOptions.Flags.DockerRegistryOrg = projectId
