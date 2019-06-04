@@ -8,7 +8,7 @@ import (
 
 	"github.com/jenkins-x/jx/pkg/util"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -195,4 +195,17 @@ func storeGCPServiceAccountIntoSecret(client kubernetes.Interface, serviceAccoun
 		_, err = secrets.Update(secret)
 	}
 	return secretName, nil
+}
+
+// GetGoogleZone returns the GCP zone
+func GetGoogleZone() (string, error) {
+	cmd := util.Command{
+		Name: "gcloud",
+		Args: []string{"config", "get-value", "compute/zone"},
+	}
+	out, err := cmd.RunWithoutRetry()
+	if err != nil {
+		return "", err
+	}
+	return out, nil
 }

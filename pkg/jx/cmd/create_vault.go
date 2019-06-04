@@ -241,9 +241,15 @@ func (o *CreateVaultOptions) createVaultGKE(vaultOperatorClient versioned.Interf
 	}
 
 	if o.GKEProjectID == "" {
-		o.GKEProjectID, err = o.GetGoogleProjectId()
+		o.GKEProjectID, err = gke.GetCurrentProject()
 		if err != nil {
 			return err
+		}
+		if o.GKEProjectID == "" {
+			o.GKEProjectID, err = o.GetGoogleProjectId()
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -254,18 +260,24 @@ func (o *CreateVaultOptions) createVaultGKE(vaultOperatorClient versioned.Interf
 	}
 
 	if o.GKEZone == "" {
-		defaultZone := ""
-		if cluster, err := cluster.Name(o.Kube()); err == nil && cluster != "" {
-			if clusterZone, err := gke.ClusterZone(cluster); err == nil {
-				defaultZone = clusterZone
-			}
-		}
-
-		zone, err := o.GetGoogleZoneWithDefault(o.GKEProjectID, defaultZone)
+		o.GKEZone, err = gke.GetGoogleZone()
 		if err != nil {
 			return err
 		}
-		o.GKEZone = zone
+		if o.GKEZone == "" {
+			defaultZone := ""
+			if cluster, err := cluster.Name(o.Kube()); err == nil && cluster != "" {
+				if clusterZone, err := gke.ClusterZone(cluster); err == nil {
+					defaultZone = clusterZone
+				}
+			}
+
+			zone, err := o.GetGoogleZoneWithDefault(o.GKEProjectID, defaultZone)
+			if err != nil {
+				return err
+			}
+			o.GKEZone = zone
+		}
 	}
 
 	log.Infof("Ensure KMS API is enabled\n")

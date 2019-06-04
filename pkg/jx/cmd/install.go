@@ -114,6 +114,7 @@ type InstallFlags struct {
 	Vault                       bool
 	RecreateVaultBucket         bool
 	Tekton                      bool
+	Minimal                     bool
 	KnativeBuild                bool
 	ExternalDNS                 bool
 	BuildPackName               string
@@ -347,10 +348,11 @@ func (options *InstallOptions) addInstallFlags(cmd *cobra.Command, includesInit 
 	cmd.Flags().StringVarP(&flags.ExposeControllerPathMode, "exposecontroller-pathmode", "", "", "The ExposeController path mode for how services should be exposed as URLs. Defaults to using subnets. Use a value of `path` to use relative paths within the domain host such as when using AWS ELB host names")
 	cmd.Flags().StringVarP(&flags.Version, "version", "", "", "The specific platform version to install")
 	cmd.Flags().BoolVarP(&flags.Prow, "prow", "", false, "Enable Prow to implement Serverless Jenkins and support ChatOps on Pull Requests")
+	cmd.Flags().BoolVarP(&flags.Minimal, "minimal", "", false, "Enable a minimal installation with only the basic charts needed for Jenkins X")
 	cmd.Flags().BoolVarP(&flags.Tekton, "tekton", "", false, "Enables the Tekton pipeline engine (which used to be called knative build pipeline) along with Prow to provide Serverless Jenkins. Otherwise we default to use Knative Build if you enable Prow")
 	cmd.Flags().BoolVarP(&flags.KnativeBuild, "knative-build", "", false, "Note this option is deprecated now in favour of tekton. If specified this will keep using the old knative build with Prow instead of the strategic tekton")
 	cmd.Flags().BoolVarP(&flags.ExternalDNS, "external-dns", "", false, "Installs external-dns into the cluster. ExternalDNS manages service DNS records for your cluster, providing you've setup your domain record")
-	cmd.Flags().BoolVarP(&flags.GitOpsMode, "gitops", "", false, "Creates a git repository for the Dev environment to manage the installation, configuration, upgrade and addition of Apps in Jenkins X all via GitOps")
+	cmd.Flags().BoolVarP(&flags.GitOpsMode, "gitops", "", true, "Creates a git repository for the Dev environment to manage the installation, configuration, upgrade and addition of Apps in Jenkins X all via GitOps")
 	cmd.Flags().BoolVarP(&flags.NoGitOpsEnvApply, "no-gitops-env-apply", "", false, "When using GitOps to create the source code for the development environment and installation, don't run 'jx step env apply' to perform the install")
 	cmd.Flags().BoolVarP(&flags.NoGitOpsEnvRepo, "no-gitops-env-repo", "", false, "When using GitOps to create the source code for the development environment this flag disables the creation of a git repository for the source code")
 	cmd.Flags().BoolVarP(&flags.NoGitOpsVault, "no-gitops-vault", "", false, "When using GitOps to create the source code for the development environment this flag disables the creation of a vault")
@@ -416,6 +418,10 @@ func (options *InstallOptions) checkFlags() error {
 		flags.Kaniko = true
 		options.InitOptions.Flags.NoTiller = true
 	}
+	if options.Flags.Provider == cloud.GKE {
+		flags.Kaniko = true
+	}
+
 	// check some flags combination for GitOps mode
 	if flags.GitOpsMode {
 		options.SkipAuthSecretsMerge = true
@@ -979,7 +985,30 @@ func (options *InstallOptions) installPlatformGitOpsMode(gitOpsEnvDir string, gi
 	if err != nil {
 		return err
 	}
-
+	err = options.setValuesFileValue(filepath.Join(gitOpsEnvDir, "nexus", helm.ValuesFileName), "enabled", !options.Flags.Minimal)
+	if err != nil {
+		return err
+	}
+	err = options.setValuesFileValue(filepath.Join(gitOpsEnvDir, "monocular", helm.ValuesFileName), "enabled", !options.Flags.Minimal)
+	if err != nil {
+		return err
+	}
+	err = options.setValuesFileValue(filepath.Join(gitOpsEnvDir, "controllercommitstatus", helm.ValuesFileName), "enabled", !options.Flags.Minimal)
+	if err != nil {
+		return err
+	}
+	err = options.setValuesFileValue(filepath.Join(gitOpsEnvDir, "controllerrole", helm.ValuesFileName), "enabled", !options.Flags.Minimal)
+	if err != nil {
+		return err
+	}
+	err = options.setValuesFileValue(filepath.Join(gitOpsEnvDir, "controllerteam", helm.ValuesFileName), "enabled", !options.Flags.Minimal)
+	if err != nil {
+		return err
+	}
+	err = options.setValuesFileValue(filepath.Join(gitOpsEnvDir, "docker-registry", helm.ValuesFileName), "enabled", !(options.Flags.Provider == cloud.GKE))
+	if err != nil {
+		return err
+	}
 	// lets load any existing values.yaml data as we may have created this via additional apps like Prow
 	exists, err = util.FileExists(valuesFile)
 	if err != nil {
