@@ -73,7 +73,7 @@ func (o *CommonOptions) TeamHelmBin() (string, bool, bool, error) {
 	helmBin := defaultHelmBin
 	teamSettings, err := o.TeamSettings()
 	if err != nil {
-		return helmBin, false, false, err
+		return helmBin, false, true, err
 	}
 
 	helmBin = teamSettings.HelmBinary
