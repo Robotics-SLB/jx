@@ -30,6 +30,7 @@ type StepHelmApplyOptions struct {
 
 	Namespace          string
 	ReleaseName        string
+	Values             []string
 	Wait               bool
 	Force              bool
 	DisableHelmVersion bool
@@ -81,7 +82,7 @@ func NewCmdStepHelmApply(commonOpts *opts.CommonOptions) *cobra.Command {
 	cmd.Flags().BoolVarP(&options.Force, "force", "f", true, "Whether to to pass '--force' to helm to help deal with upgrading if a previous promote failed")
 	cmd.Flags().BoolVar(&options.DisableHelmVersion, "no-helm-version", false, "Don't set Chart version before applying")
 	cmd.Flags().BoolVarP(&options.Vault, "vault", "", false, "Helm secrets are stored in vault")
-
+	cmd.Flags().StringArrayVarP(&options.Values, "set", "", []string{}, "Set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 	return cmd
 }
 
@@ -234,6 +235,7 @@ func (o *StepHelmApplyOptions) Run() error {
 		Ns:          ns,
 		NoForce:     !o.Force,
 		ValueFiles:  valueFiles,
+		SetValues:   o.Values,
 	}
 	if o.Wait {
 		helmOptions.Wait = true
