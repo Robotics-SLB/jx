@@ -97,10 +97,12 @@ func NewVaultClientFactory(kubeClient kubernetes.Interface, vaultOperatorClient 
 // if the name is nil, and only one vault is found, then that vault will be used. Otherwise the user will be prompted to
 // select a vault for the client.
 func (v *VaultClientFactory) NewVaultClient(name string, namespace string) (*api.Client, error) {
+	log.Logger().Info("XXXXXXXXXXXXd6")
 	config, jwt, role, err := v.GetConfigData(name, namespace)
 	if err != nil {
 		return nil, err
 	}
+	log.Logger().Info("XXXXXXXXXXXXd7")
 	vaultClient, err := api.NewClient(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating vault client")
@@ -133,6 +135,7 @@ func (v *VaultClientFactory) GetConfigData(name string, namespace string) (confi
 	if namespace == "" {
 		namespace = v.defaultNamespace
 	}
+	log.Logger().Info("XXXXXXXXXXXXd8")
 	vlt, err := v.Selector.GetVault(name, namespace)
 	if err != nil {
 		return nil, "", "", err

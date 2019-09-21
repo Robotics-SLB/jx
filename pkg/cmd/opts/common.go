@@ -1001,10 +1001,13 @@ func (o *CommonOptions) SystemVaultClient(namespace string) (vault.Client, error
 				return nil, errors.Wrapf(err, "failed to find development namespace")
 			}
 		}
+		log.Logger().Info("XXXXXXXXXXXXb1")
 		systemVaultClient, err := o.factory.CreateSystemVaultClient(namespace)
+		log.Logger().Info("XXXXXXXXXXXXb2")
 		if err != nil {
 			return nil, err
 		}
+		log.Logger().Info("XXXXXXXXXXXXb3")
 		o.systemVaultClient = systemVaultClient
 	}
 	return o.systemVaultClient, nil

@@ -422,8 +422,10 @@ func (o *CommonOptions) GetSecretURLClient(location secrets.SecretsLocationKind)
 		return o.secretURLClient, nil
 	}
 	var err error
+	log.Logger().Info("XXXXXXXXXXXXa4")
 	switch location {
 	case secrets.VaultLocationKind:
+		log.Logger().Info("XXXXXXXXXXXXa5")
 		o.secretURLClient, err = o.SystemVaultClient(o.devNamespace)
 		if err != nil {
 			return o.secretURLClient, errors.Wrapf(err, "creating system vault URL client")

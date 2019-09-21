@@ -412,10 +412,14 @@ func (f *factory) ResetSecretsLocation() {
 
 // CreateSystemVaultClient gets the system vault client for managing the secrets
 func (f *factory) CreateSystemVaultClient(namespace string) (vault.Client, error) {
+	log.Logger().Info("XXXXXXXXXXXXc1")
 	name, err := f.getVaultName(namespace)
+	log.Logger().Info("XXXXXXXXXXXXc2")
 	if err != nil {
+		log.Logger().Info("XXXXXXXXXXXXc3")
 		return nil, err
 	}
+	log.Logger().Info("XXXXXXXXXXXXc4")
 	return f.CreateVaultClient(name, namespace)
 }
 
@@ -453,10 +457,12 @@ func (f *factory) getVaultName(namespace string) (string, error) {
 // CreateVaultClient returns the given vault client for managing secrets
 // Will use default values for name and namespace if nil values are applied
 func (f *factory) CreateVaultClient(name string, namespace string) (vault.Client, error) {
+	log.Logger().Info("XXXXXXXXXXXXd1")
 	vopClient, err := f.CreateVaultOperatorClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "creating the vault operator client")
 	}
+	log.Logger().Info("XXXXXXXXXXXXd2")
 	kubeClient, defaultNamespace, err := f.CreateKubeClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "creating the kube client")
@@ -471,7 +477,7 @@ func (f *factory) CreateVaultClient(name string, namespace string) (vault.Client
 		}
 		namespace = devNamespace
 	}
-
+	log.Logger().Info("XXXXXXXXXXXXd3")
 	// Get the system vault name from configuration if nothing is specified by the user
 	if name == "" {
 		name, err = f.getVaultName(namespace)
@@ -479,7 +485,7 @@ func (f *factory) CreateVaultClient(name string, namespace string) (vault.Client
 			return nil, errors.Wrap(err, "reading the vault name from configuration")
 		}
 	}
-
+	log.Logger().Infof("XXXXXXXXXXXXd4 %s", name)
 	if !kubevault.FindVault(vopClient, name, namespace) {
 		return nil, fmt.Errorf("no %q vault found in namespace %q", name, namespace)
 	}
@@ -488,6 +494,7 @@ func (f *factory) CreateVaultClient(name string, namespace string) (vault.Client
 	if err != nil {
 		return nil, errors.Wrap(err, "creating vault client")
 	}
+	log.Logger().Info("XXXXXXXXXXXXd5")
 	vaultClient, err := clientFactory.NewVaultClient(name, namespace)
 	return vault.NewVaultClient(vaultClient), err
 }

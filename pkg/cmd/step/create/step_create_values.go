@@ -182,10 +182,13 @@ func (o *StepCreateValuesOptions) CreateValuesFile() error {
 	if err != nil {
 		return errors.Wrapf(err, "getting team name")
 	}
+	log.Logger().Info("XXXXXXXXXXXXa1")
 	secretURLClient, err := o.GetSecretURLClient(secrets.ToSecretsLocation(o.SecretsScheme))
+	log.Logger().Info("XXXXXXXXXXXXa2")
 	if err != nil {
 		return err
 	}
+	log.Logger().Info("XXXXXXXXXXXXa3")
 	existing, err := helm.LoadValuesFile(o.ValuesFile)
 	if err != nil {
 		return errors.Wrapf(err, "failed to load values file %s", o.ValuesFile)

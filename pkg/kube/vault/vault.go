@@ -422,19 +422,23 @@ func GetVault(vaultOperatorClient versioned.Interface, name string, ns string) (
 
 // GetVaults returns all vaults available in a given namespaces
 func GetVaults(client kubernetes.Interface, vaultOperatorClient versioned.Interface, ns string) ([]*Vault, error) {
+	log.Logger().Info("XXXXXXXXXXXXd9")
 	vaultList, err := vaultOperatorClient.Vault().Vaults(ns).List(metav1.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "listing vaults in namespace '%s'", ns)
 	}
-
+	log.Logger().Info("XXXXXXXXXXXXX10")
 	vaults := []*Vault{}
 	for _, v := range vaultList.Items {
+		log.Logger().Info("XXXXXXXXXXXXX11")
 		vaultName := v.Name
 		vaultAuthSaName := GetAuthSaName(v)
 		// default to using internal kubernetes service dns name
-		vaultURL := vaultName
+		vaultURL := "http://" + vaultName
+		log.Logger().Infof("XXXXXXXXXXXXX12 %s", vaultURL)
 		// is there a better way to do this?
 		if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
+			log.Logger().Info("XXXXXXXXXXXXX13")
 			vaultURL, err := services.FindServiceURL(client, ns, vaultName)
 			if err != nil {
 				log.Logger().Warnf("error finding vault service url setting to empty string, err: %s", err)
@@ -448,7 +452,7 @@ func GetVaults(client kubernetes.Interface, vaultOperatorClient versioned.Interf
 				}
 			}
 		}
-
+		log.Logger().Infof("XXXXXXXXXXXXX14 %s", vaultURL)
 		vault := Vault{
 			Name:                   vaultName,
 			Namespace:              ns,
