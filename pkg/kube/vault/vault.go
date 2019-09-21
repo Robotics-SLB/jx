@@ -3,6 +3,7 @@ package vault
 import (
 	"fmt"
 	"github.com/jenkins-x/jx/pkg/log"
+	"os"
 
 	"github.com/banzaicloud/bank-vaults/operator/pkg/apis/vault/v1alpha1"
 	"github.com/banzaicloud/bank-vaults/operator/pkg/client/clientset/versioned"
@@ -430,16 +431,21 @@ func GetVaults(client kubernetes.Interface, vaultOperatorClient versioned.Interf
 	for _, v := range vaultList.Items {
 		vaultName := v.Name
 		vaultAuthSaName := GetAuthSaName(v)
-		vaultURL, err := services.FindServiceURL(client, ns, vaultName)
-		if err != nil {
-			log.Logger().Warnf("error finding vault service url setting to empty string, err: %s", err)
-			vaultURL = ""
-		}
-		if vaultURL == "" {
-			vaultURL, err = services.FindIngressURL(client, ns, vaultName)
+		// default to using internal kubernetes service dns name
+		vaultURL := vaultName
+		// is there a better way to do this?
+		if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
+			vaultURL, err := services.FindServiceURL(client, ns, vaultName)
 			if err != nil {
-				log.Logger().Warnf("error finding vault ingress url setting to empty string, err: %s", err)
+				log.Logger().Warnf("error finding vault service url setting to empty string, err: %s", err)
 				vaultURL = ""
+			}
+			if vaultURL == "" {
+				vaultURL, err = services.FindIngressURL(client, ns, vaultName)
+				if err != nil {
+					log.Logger().Warnf("error finding vault ingress url setting to empty string, err: %s", err)
+					vaultURL = ""
+				}
 			}
 		}
 
