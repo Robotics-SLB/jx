@@ -1,8 +1,9 @@
 package get
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	cmd_mocks "github.com/jenkins-x/jx/pkg/cmd/clients/mocks"
 	. "github.com/petergtz/pegomock"

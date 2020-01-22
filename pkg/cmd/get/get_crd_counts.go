@@ -2,9 +2,10 @@ package get
 
 import (
 	"fmt"
-	"github.com/jenkins-x/jx/pkg/log"
 	"sort"
 	"strconv"
+
+	"github.com/jenkins-x/jx/pkg/log"
 
 	"github.com/jenkins-x/jx/pkg/cmd/helper"
 	"github.com/pkg/errors"
