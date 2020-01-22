@@ -96,6 +96,7 @@ require (
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pkg/browser v0.0.0-20170505125900-c90ca0c84f15
 	github.com/pkg/errors v0.8.1
+	github.com/prometheus/common v0.0.0-20181126121408-4724e9255275
 	github.com/rickar/props v0.0.0-20170718221555-0b06aeb2f037
 	github.com/rodaine/hclencoder v0.0.0-20180926060551-0680c4321930
 	github.com/rollout/rox-go v0.0.0-20181220111955-29ddae74a8c4
